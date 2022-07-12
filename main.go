@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 
@@ -11,7 +13,9 @@ func main() {
 	for i := 0; i < 5; i++ {
 		graph.AddVertex(i)
 	}
-
+	graph.AddVertex(2)
+	graph.AddVertex(5)
+	graph.AddVertex(6)
 	graph.Print()
 
 }
@@ -39,7 +43,7 @@ type Vertex struct {
 
 //addVertex
 func (g *Graph) AddVertex(k int) {
-	if !contains(g.vertices, k) {
+	if contains(g.vertices, k) {
 		err := fmt.Errorf("Vertex %v not added beacuse it is an existing key", k)
 		fmt.Println(err.Error())
 	} else {
@@ -58,3 +62,26 @@ func contains(s []*Vertex, k int) bool {
 }
 
 //addEdge
+func (g *Graph) addEdge(from, to int) {
+
+	//get vertex
+	//fromVertex := g.getVertex(from)
+	//toVertex := g.getVertex(to)
+	//check error
+	//add edge
+
+}
+
+//getVertex return a pointer to the Vertex with a key int
+func (g *Graph) getVertex(k int) *Vertex {
+
+	for i, v := range g.vertices {
+		if v.key == k {
+			return g.vertices[i]
+		} else {
+			err := fmt.Errorf("cannot find Vertex with %v key", k)
+			fmt.Println(err.Error())
+		}
+	}
+	return nil
+}
