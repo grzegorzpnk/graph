@@ -79,6 +79,7 @@ func (g *Graph) addEdge(from, to int) {
 	} else {
 		//add edge
 		fromVertex.adjacent = append(fromVertex.adjacent, toVertex)
+		fmt.Println("aaa")
 	}
 }
 
