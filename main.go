@@ -13,21 +13,13 @@ func main() {
 	for i := 0; i < 5; i++ {
 		graph.AddVertex(i)
 	}
-	graph.AddVertex(2)
 	graph.AddVertex(5)
 	graph.AddVertex(6)
+	graph.addEdge(1, 3)
+	graph.addEdge(1, 3)
+	graph.addEdge(1, 8)
 	graph.Print()
 
-}
-
-func (g *Graph) Print() {
-	for _, v := range g.vertices {
-		fmt.Printf("\nVertex: %v : ", v.key)
-		for _, v := range v.adjacent {
-			fmt.Printf("%v : ", v.key)
-		}
-	}
-	fmt.Println()
 }
 
 //graph structure
@@ -39,6 +31,16 @@ type Graph struct {
 type Vertex struct {
 	key      int
 	adjacent []*Vertex
+}
+
+func (g *Graph) Print() {
+	for _, v := range g.vertices {
+		fmt.Printf("\nVertex: %v : ", v.key)
+		for _, v := range v.adjacent {
+			fmt.Printf("%v  ", v.key)
+		}
+	}
+	fmt.Println()
 }
 
 //addVertex
@@ -65,11 +67,19 @@ func contains(s []*Vertex, k int) bool {
 func (g *Graph) addEdge(from, to int) {
 
 	//get vertex
-	//fromVertex := g.getVertex(from)
-	//toVertex := g.getVertex(to)
+	fromVertex := g.getVertex(from)
+	toVertex := g.getVertex(to)
 	//check error
-	//add edge
-
+	if fromVertex == nil || toVertex == nil {
+		err := fmt.Errorf("Invalid edge (%v-->%v)", from, to)
+		fmt.Println(err.Error())
+	} else if contains(fromVertex.adjacent, to) {
+		err := fmt.Errorf("Edge (%v-->%v) already exist", from, to)
+		fmt.Println(err.Error())
+	} else {
+		//add edge
+		fromVertex.adjacent = append(fromVertex.adjacent, toVertex)
+	}
 }
 
 //getVertex return a pointer to the Vertex with a key int
@@ -78,9 +88,6 @@ func (g *Graph) getVertex(k int) *Vertex {
 	for i, v := range g.vertices {
 		if v.key == k {
 			return g.vertices[i]
-		} else {
-			err := fmt.Errorf("cannot find Vertex with %v key", k)
-			fmt.Println(err.Error())
 		}
 	}
 	return nil
