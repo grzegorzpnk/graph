@@ -16,8 +16,11 @@ func main() {
 	graph.AddVertex(5)
 	graph.AddVertex(6)
 	graph.addEdge(1, 3)
-	graph.addEdge(1, 3)
-	graph.addEdge(1, 8)
+	graph.addEdge(2, 4)
+	graph.addEdge(3, 1)
+	graph.addEdge(1, 5)
+	graph.addEdge(4, 5)
+	graph.addEdge(4, 5)
 	graph.Print()
 
 }
@@ -71,14 +74,15 @@ func (g *Graph) addEdge(from, to int) {
 	toVertex := g.getVertex(to)
 	//check error
 	if fromVertex == nil || toVertex == nil {
-		err := fmt.Errorf("Invalid edge (%v-->%v)", from, to)
+		err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
 		fmt.Println(err.Error())
-	} else if contains(fromVertex.adjacent, to) {
-		err := fmt.Errorf("Edge (%v-->%v) already exist", from, to)
+	} else if contains(fromVertex.adjacent, to) || contains(toVertex.adjacent, from) {
+		err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
 		fmt.Println(err.Error())
 	} else {
 		//add edge
 		fromVertex.adjacent = append(fromVertex.adjacent, toVertex)
+		toVertex.adjacent = append(toVertex.adjacent, fromVertex)
 	}
 }
 
