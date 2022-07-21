@@ -30,56 +30,87 @@ func main() {
 
 	//create router handlers
 	r.HandleFunc("/graph/vertex", getVertexesHandler).Methods("GET")
-	r.HandleFunc("/graph/vertex/{id}", getVertexHandler).Methods("GET")
-	r.HandleFunc("graph/vertex/", createVertex).Methods("POST")
+	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
 //graph structure
 type Graph struct {
-	Vertices []*Vertex `json:"Verticies"`
+	Vertices []*Vertex
 }
 
 //vertex structure
 type Vertex struct {
-	Key int `json:"Key"`
-	//Adj 	 []int 	   `json:"Adj"`
-	Adjacent []*Vertex `json:"Adjacent"`
+	Id         int   `json:"id"`
+	Neighbours []int `json:"neighbours"`
 }
 
 func (g *Graph) Print() {
+
 	for _, v := range g.Vertices {
-		fmt.Printf("\nVertex: %v : ", v.Key)
-		for _, v := range v.Adjacent {
-			fmt.Printf("%v  ", v.Key)
+		fmt.Printf("\nVertex: %v : ", v.Id)
+		for _, v := range v.Neighbours {
+			fmt.Printf("%v  ", v)
 		}
 	}
 	fmt.Println()
+
 }
 
 //addVertex
 func (g *Graph) AddVertex(k int) {
-	if contains(g.Vertices, k) {
-		err := fmt.Errorf("Vertex %v not added beacuse it is an existing key", k)
+	if containsVertex(g.Vertices, k) {
+		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", k)
 		fmt.Println(err.Error())
 	} else {
-		g.Vertices = append(g.Vertices, &Vertex{Key: k})
+		g.Vertices = append(g.Vertices, &Vertex{Id: k})
 	}
 }
 
-func contains(s []*Vertex, k int) bool {
+func containsVertex(s []*Vertex, k int) bool {
 
 	for _, v := range s {
-		if k == v.Key {
+		if k == v.Id {
 			return true
 		}
 	}
 	return false
+
+}
+
+func containsInt(s []int, k int) bool {
+
+	for _, v := range s {
+		if k == v {
+			return true
+		}
+	}
+	return false
+
 }
 
 //addEdge
 func (g *Graph) addEdge(from, to int) {
+
+	/*	//get vertex
+		fromVertex := g.getVertex(from)
+		toVertex := g.getVertex(to)
+		//check error
+		if fromVertex == nil || toVertex == nil {
+			err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
+			fmt.Println(err.Error())
+		} else if containsVertex(fromVertex.Adjacent, to) || containsVertex(toVertex.Adjacent, from) {
+			err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
+			fmt.Println(err.Error())
+		} else {
+			//add edge
+			fromVertex.Adjacent = append(fromVertex.Adjacent, toVertex)
+			toVertex.Adjacent = append(toVertex.Adjacent, fromVertex)
+		}*/
+
+	/////SECOND IMPLEMENTATION/////
 
 	//get vertex
 	fromVertex := g.getVertex(from)
@@ -88,21 +119,22 @@ func (g *Graph) addEdge(from, to int) {
 	if fromVertex == nil || toVertex == nil {
 		err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
 		fmt.Println(err.Error())
-	} else if contains(fromVertex.Adjacent, to) || contains(toVertex.Adjacent, from) {
+	} else if containsInt(fromVertex.Neighbours, to) || containsInt(toVertex.Neighbours, from) {
 		err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
 		fmt.Println(err.Error())
 	} else {
 		//add edge
-		fromVertex.Adjacent = append(fromVertex.Adjacent, toVertex)
-		toVertex.Adjacent = append(toVertex.Adjacent, fromVertex)
+		fromVertex.Neighbours = append(fromVertex.Neighbours, to)
+		toVertex.Neighbours = append(toVertex.Neighbours, from)
 	}
+
 }
 
 //getVertexHandler return a pointer to the Vertex with a key int
 func (g *Graph) getVertex(k int) *Vertex {
 
 	for i, v := range g.Vertices {
-		if v.Key == k {
+		if v.Id == k {
 			return g.Vertices[i]
 		}
 	}
