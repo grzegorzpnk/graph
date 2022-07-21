@@ -39,6 +39,12 @@ func main() {
 //graph structure
 type Graph struct {
 	Vertices []*Vertex
+	Edges    []*Edge
+}
+
+type Edge struct {
+	Source Vertex
+	Target Vertex
 }
 
 //vertex structure
@@ -49,6 +55,7 @@ type Vertex struct {
 
 func (g *Graph) Print() {
 
+	//print vertexes
 	for _, v := range g.Vertices {
 		fmt.Printf("\nVertex: %v : ", v.Id)
 		for _, v := range v.Neighbours {
@@ -56,6 +63,11 @@ func (g *Graph) Print() {
 		}
 	}
 	fmt.Println()
+
+	//print edges
+	for _, v := range g.Edges {
+		fmt.Printf("Edge between: %v and %v\n", v.Source.Id, v.Target.Id)
+	}
 
 }
 
@@ -126,6 +138,8 @@ func (g *Graph) addEdge(from, to int) {
 		//add edge
 		fromVertex.Neighbours = append(fromVertex.Neighbours, to)
 		toVertex.Neighbours = append(toVertex.Neighbours, from)
+
+		g.Edges = append(g.Edges, &Edge{*g.getVertex(to), *g.getVertex(from)})
 	}
 
 }
