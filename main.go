@@ -14,7 +14,11 @@ func main() {
 	graph = &Graph{}
 
 	for i := 0; i < 6; i++ {
-		graph.AddVertex(i)
+		if i%2 == 0 {
+			graph.AddVertex(i, "MEC")
+		} else {
+			graph.AddVertex(i, "CELL")
+		}
 	}
 
 	graph.addEdge(1, 3)
@@ -49,8 +53,9 @@ type Edge struct {
 
 //vertex structure
 type Vertex struct {
-	Id         int   `json:"id"`
-	Neighbours []int `json:"neighbours"`
+	Id         int    `json:"id"`
+	Kind       string `json:"type"` //MEC or CELL
+	Neighbours []int  `json:"neighbours"`
 }
 
 func (g *Graph) Print() {
@@ -72,12 +77,12 @@ func (g *Graph) Print() {
 }
 
 //addVertex
-func (g *Graph) AddVertex(k int) {
+func (g *Graph) AddVertex(k int, kind string) {
 	if containsVertex(g.Vertices, k) {
 		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", k)
 		fmt.Println(err.Error())
 	} else {
-		g.Vertices = append(g.Vertices, &Vertex{Id: k})
+		g.Vertices = append(g.Vertices, &Vertex{Id: k, Kind: kind})
 	}
 }
 

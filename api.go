@@ -13,14 +13,15 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 
 	var vertex Vertex
 	_ = json.NewDecoder(r.Body).Decode(&vertex)
-	fmt.Println(vertex.Id)
+	fmt.Printf("Client tries to add new vertex ID: %v\n", vertex.Id)
 	if containsVertex(graph.Vertices, vertex.Id) {
 		err := fmt.Errorf("Vertex %v not added beacuse it is an existing key", vertex.Id)
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusConflict)
 	} else {
-		graph.AddVertex(vertex.Id)
+		graph.AddVertex(vertex.Id, vertex.Kind)
 		w.WriteHeader(http.StatusOK)
+		fmt.Printf("added new vertex ID: %v", vertex.Id)
 	}
 }
 
