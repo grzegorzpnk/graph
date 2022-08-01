@@ -8,57 +8,84 @@ import (
 )
 
 var graph *Graph
+var r mux.Router
 
 func main() {
 
 	graph = &Graph{}
+	initializingGraph()
 
-	for i := 0; i < 6; i++ {
-		if i%2 == 0 {
-			graph.AddVertex(i, "MEC")
-		} else {
-			graph.AddVertex(i, "CELL")
-		}
-	}
-
-	graph.addEdge(1, 3)
-	graph.addEdge(2, 4)
-	graph.addEdge(3, 1)
-	graph.addEdge(1, 5)
-	graph.addEdge(4, 5)
-	graph.addEdge(4, 5)
-	graph.Print()
-
-	//create router
 	r := mux.NewRouter()
-
-	//create router handlers
-	r.HandleFunc("/graph/vertex", getVertexesHandler).Methods("GET")
-	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
-	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
+	defineRouterHandlers()
 
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
-//graph structure
 type Graph struct {
 	Vertices []*Vertex
 	Edges    []*Edge
 }
 
-type Edge struct {
-	Source Vertex
-	Target Vertex
-}
-
-//vertex structure
 type Vertex struct {
 	Id         int    `json:"id"`
-	Kind       string `json:"type"` //MEC or CELL
+	Type       string `json:"type"` //MEC or CELL
 	Neighbours []int  `json:"neighbours"`
 }
 
-func (g *Graph) Print() {
+type Edge struct {
+	Source  int     `json:"source"`
+	Target  int     `json:"target"`
+	Latency float32 `json:"latency"`
+}
+
+func (g *Graph) getVertex(k int) *Vertex {
+	//getVertexHandler return a pointer to the Vertex with a key int
+
+	for i, v := range g.Vertices {
+		if v.Id == k {
+			return g.Vertices[i]
+		}
+	}
+	return nil
+}
+
+func (g *Graph) addVertex(k int, kind string) {
+	if containsVertex(g.Vertices, k) {
+		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", k)
+		fmt.Println(err.Error())
+	} else {
+		g.Vertices = append(g.Vertices, &Vertex{Id: k, Type: kind})
+		fmt.Printf("added new vertex ID: %v", k)
+	}
+}
+
+func (g *Graph) addEdge(from, to int, latency float32) {
+
+	//get vertex
+	fromVertex := g.getVertex(from)
+	toVertex := g.getVertex(to)
+	//check error
+	if fromVertex == nil || toVertex == nil {
+		err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
+		fmt.Println(err.Error())
+	} else if fromVertex.Type == toVertex.Type {
+		err := fmt.Errorf("You cannot connect two Vertexes at the same type:  %v !\n", fromVertex.Type)
+		fmt.Println(err.Error())
+	} else if containsInt(fromVertex.Neighbours, to) || containsInt(toVertex.Neighbours, from) {
+		err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
+		fmt.Println(err.Error())
+	} else {
+		//add edge at vertexes instances
+		fromVertex.Neighbours = append(fromVertex.Neighbours, to)
+		toVertex.Neighbours = append(toVertex.Neighbours, from)
+
+		//add edge at  Edges list
+		g.Edges = append(g.Edges, &Edge{from, to, latency})
+		fmt.Printf("New Edge added : %v --- %v \n", from, to)
+	}
+}
+
+func (g *Graph) printGraph() {
 
 	//print vertexes
 	for _, v := range g.Vertices {
@@ -71,19 +98,9 @@ func (g *Graph) Print() {
 
 	//print edges
 	for _, v := range g.Edges {
-		fmt.Printf("Edge between: %v and %v\n", v.Source.Id, v.Target.Id)
+		fmt.Printf("Edge between: %v and %v\n", v.Source, v.Target)
 	}
 
-}
-
-//addVertex
-func (g *Graph) AddVertex(k int, kind string) {
-	if containsVertex(g.Vertices, k) {
-		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", k)
-		fmt.Println(err.Error())
-	} else {
-		g.Vertices = append(g.Vertices, &Vertex{Id: k, Kind: kind})
-	}
 }
 
 func containsVertex(s []*Vertex, k int) bool {
@@ -108,54 +125,31 @@ func containsInt(s []int, k int) bool {
 
 }
 
-//addEdge
-func (g *Graph) addEdge(from, to int) {
+func defineRouterHandlers() {
+	r.HandleFunc("/graph/vertex", getAllVertexesHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
 
-	/*	//get vertex
-		fromVertex := g.getVertex(from)
-		toVertex := g.getVertex(to)
-		//check error
-		if fromVertex == nil || toVertex == nil {
-			err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
-			fmt.Println(err.Error())
-		} else if containsVertex(fromVertex.Adjacent, to) || containsVertex(toVertex.Adjacent, from) {
-			err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
-			fmt.Println(err.Error())
-		} else {
-			//add edge
-			fromVertex.Adjacent = append(fromVertex.Adjacent, toVertex)
-			toVertex.Adjacent = append(toVertex.Adjacent, fromVertex)
-		}*/
-
-	/////SECOND IMPLEMENTATION/////
-
-	//get vertex
-	fromVertex := g.getVertex(from)
-	toVertex := g.getVertex(to)
-	//check error
-	if fromVertex == nil || toVertex == nil {
-		err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
-		fmt.Println(err.Error())
-	} else if containsInt(fromVertex.Neighbours, to) || containsInt(toVertex.Neighbours, from) {
-		err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
-		fmt.Println(err.Error())
-	} else {
-		//add edge
-		fromVertex.Neighbours = append(fromVertex.Neighbours, to)
-		toVertex.Neighbours = append(toVertex.Neighbours, from)
-
-		g.Edges = append(g.Edges, &Edge{*g.getVertex(to), *g.getVertex(from)})
-	}
+	r.HandleFunc("/graph/edge", getEdgesHandler).Methods("GET")
+	//r.HandleFunc("/graph/edge/{Id}", getEdgeHandler).Methods("GET")
+	r.HandleFunc("/graph/edge", createEdgeHandler).Methods("POST")
 
 }
 
-//getVertexHandler return a pointer to the Vertex with a key int
-func (g *Graph) getVertex(k int) *Vertex {
+func initializingGraph() {
 
-	for i, v := range g.Vertices {
-		if v.Id == k {
-			return g.Vertices[i]
+	for i := 0; i < 6; i++ {
+		if i%2 == 0 {
+			graph.addVertex(i, "MEC")
+		} else {
+			graph.addVertex(i, "CELL")
 		}
 	}
-	return nil
+
+	graph.addEdge(1, 4, 0)
+	graph.addEdge(2, 5, 0)
+	graph.addEdge(3, 2, 0)
+	graph.addEdge(1, 0, 0)
+	graph.addEdge(4, 5, 0)
+	graph.printGraph()
 }
