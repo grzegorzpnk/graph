@@ -1,25 +1,14 @@
 package main
 
-import (
-	"fmt"
-	"github.com/gorilla/mux"
-	"log"
-	"net/http"
-)
-
 var graph *Graph
-var r mux.Router
 
 func main() {
 
 	graph = &Graph{}
 	initializingGraph()
 
-	r := mux.NewRouter()
-	defineRouterHandlers()
+	startServer()
 
-	fmt.Println("Graph is started listening")
-	log.Fatal(http.ListenAndServe("localhost:8080", r))
 }
 
 func initializingGraph() {
