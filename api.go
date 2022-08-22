@@ -66,9 +66,22 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusConflict)
 	} else {
+		if containsEdge(vertex) {
+			vertex.Neighbours = nil
+		}
 		graph.addVertex(vertex)
 		w.WriteHeader(http.StatusOK)
 	}
+}
+
+func containsEdge(vertex Vertex) bool {
+
+	if vertex.Neighbours != nil {
+		return true
+	} else {
+		return false
+	}
+
 }
 
 func getEdgesHandler(w http.ResponseWriter, r *http.Request) {
