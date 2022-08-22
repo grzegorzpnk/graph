@@ -33,13 +33,13 @@ func (g *Graph) getVertex(k int) *Vertex {
 	return nil
 }
 
-func (g *Graph) addVertex(k int, kind string) {
-	if containsVertex(g.Vertices, k) {
-		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", k)
+func (g *Graph) addVertex(vertex Vertex) {
+	if containsVertex(g.Vertices, vertex.Id) {
+		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", vertex.Id)
 		fmt.Println(err.Error())
 	} else {
-		g.Vertices = append(g.Vertices, &Vertex{Id: k, Type: kind})
-		fmt.Printf("added new vertex ID: %v", k)
+		g.Vertices = append(g.Vertices, &vertex)
+		fmt.Printf("added new vertex  %v", vertex)
 	}
 }
 
@@ -74,6 +74,7 @@ func (g *Graph) printGraph() {
 	//print vertexes
 	for _, v := range g.Vertices {
 		fmt.Printf("\nVertex: %v : ", v.Id)
+		fmt.Println(v)
 		for _, v := range v.Neighbours {
 			fmt.Printf("%v  ", v)
 		}

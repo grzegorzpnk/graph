@@ -66,7 +66,7 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusConflict)
 	} else {
-		graph.addVertex(vertex.Id, vertex.Type)
+		graph.addVertex(vertex)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -84,4 +84,5 @@ func getAllVertexesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(graph.Vertices)
+	json.NewEncoder(w).Encode(graph.Vertices[2].VertexMetrics)
 }

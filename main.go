@@ -15,9 +15,9 @@ func initializingGraph() {
 
 	for i := 0; i < 6; i++ {
 		if i%2 == 0 {
-			graph.addVertex(i, "MEC")
+			graph.addVertex(Vertex{Id: i, Type: "MEC", VertexMetrics: ClusterMetrics{20, 50, 80}})
 		} else {
-			graph.addVertex(i, "CELL")
+			graph.addVertex(Vertex{Id: i, Type: "CELL"})
 		}
 	}
 
