@@ -43,29 +43,29 @@ func (g *Graph) addVertex(vertex Vertex) {
 	}
 }
 
-func (g *Graph) addEdge(from, to int) {
+func (g *Graph) addEdge(edge Edge) {
 
 	//get vertex
-	fromVertex := g.getVertex(from)
-	toVertex := g.getVertex(to)
+	fromVertex := g.getVertex(edge.Source)
+	toVertex := g.getVertex(edge.Target)
 	//check error
 	if fromVertex == nil || toVertex == nil {
-		err := fmt.Errorf("Invalid edge (%v<-->%v)", from, to)
+		err := fmt.Errorf("Invalid edge (%v<-->%v)", edge.Source, edge.Target)
 		fmt.Println(err.Error())
 	} else if fromVertex.Type == toVertex.Type {
 		err := fmt.Errorf("You cannot connect two Vertexes at the same type:  %v !\n", fromVertex.Type)
 		fmt.Println(err.Error())
-	} else if containsInt(fromVertex.Neighbours, to) || containsInt(toVertex.Neighbours, from) {
-		err := fmt.Errorf("Edge between (%v--%v) already exist", from, to)
+	} else if containsInt(fromVertex.Neighbours, edge.Target) || containsInt(toVertex.Neighbours, edge.Source) {
+		err := fmt.Errorf("Edge between (%v--%v) already exist", edge.Source, edge.Target)
 		fmt.Println(err.Error())
 	} else {
 		//add edge at vertexes instances
-		fromVertex.Neighbours = append(fromVertex.Neighbours, to)
-		toVertex.Neighbours = append(toVertex.Neighbours, from)
+		fromVertex.Neighbours = append(fromVertex.Neighbours, edge.Target)
+		toVertex.Neighbours = append(toVertex.Neighbours, edge.Source)
 
 		//add edge at  Edges list
-		g.Edges = append(g.Edges, &Edge{Source: from, Target: to})
-		fmt.Printf("New Edge added : %v --- %v \n", from, to)
+		g.Edges = append(g.Edges, &edge)
+		fmt.Printf("New Edge added : %v --- %v \n", edge.Source, edge.Target)
 	}
 }
 

@@ -38,7 +38,7 @@ func createEdgeHandler(w http.ResponseWriter, r *http.Request) {
 	var edge Edge
 	_ = json.NewDecoder(r.Body).Decode(&edge)
 	fmt.Printf("Client tries to add new Edge: %v --- %v \n", edge.Source, edge.Target)
-	graph.addEdge(edge.Source, edge.Target)
+	graph.addEdge(edge)
 
 }
 
@@ -84,5 +84,4 @@ func getAllVertexesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(graph.Vertices)
-	json.NewEncoder(w).Encode(graph.Vertices[2].VertexMetrics)
 }

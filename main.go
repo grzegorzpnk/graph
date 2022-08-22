@@ -21,10 +21,10 @@ func initializingGraph() {
 		}
 	}
 
-	graph.addEdge(1, 4)
-	graph.addEdge(2, 5)
-	graph.addEdge(3, 2)
-	graph.addEdge(1, 0)
-	graph.addEdge(4, 5)
+	graph.addEdge(Edge{1, 4, NetworkMetrics{1.3, 10}})
+	graph.addEdge(Edge{2, 5, NetworkMetrics{1.3, 10}})
+	graph.addEdge(Edge{3, 2, NetworkMetrics{1.3, 10}})
+	graph.addEdge(Edge{1, 0, NetworkMetrics{1.3, 10}})
+	graph.addEdge(Edge{4, 5, NetworkMetrics{1.3, 10}})
 	graph.printGraph()
 }
