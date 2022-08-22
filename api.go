@@ -8,6 +8,29 @@ import (
 	"strconv"
 )
 
+func createEdgeHandler(w http.ResponseWriter, r *http.Request) {
+	//todo: validate body of REST POST
+	w.Header().Set("Content-Type", "application/json")
+
+	var edge Edge
+	_ = json.NewDecoder(r.Body).Decode(&edge)
+	fmt.Printf("Client tries to add new Edge: %v --- %v \n", edge.Source, edge.Target)
+	graph.addEdge(edge.Source, edge.Target)
+
+}
+
+func defineRouterHandlers() {
+
+	r.HandleFunc("/graph/vertex", getAllVertexesHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
+
+	r.HandleFunc("/graph/edge", getEdgesHandler).Methods("GET")
+	//r.HandleFunc("/graph/edge/{Id}", getEdgeHandler).Methods("GET")
+	r.HandleFunc("/graph/edge", createEdgeHandler).Methods("POST")
+
+}
+
 func getVertexHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -49,16 +72,5 @@ func getEdgesHandler(w http.ResponseWriter, r *http.Request) {
 	for i, _ := range graph.Edges {
 		json.NewEncoder(w).Encode(graph.Edges[i])
 	}
-
-}
-
-func createEdgeHandler(w http.ResponseWriter, r *http.Request) {
-	//todo: validate body of REST POST
-	w.Header().Set("Content-Type", "application/json")
-
-	var edge Edge
-	_ = json.NewDecoder(r.Body).Decode(&edge)
-	fmt.Printf("Client tries to add new Edge: %v --- %v \n", edge.Source, edge.Target)
-	graph.addEdge(edge.Source, edge.Target, edge.Latency)
 
 }
