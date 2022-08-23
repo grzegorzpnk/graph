@@ -12,3 +12,11 @@ type NetworkMetrics struct {
 	Latency    float32 `json:"latency"`
 	PacketDrop int     `json:"packetDrop"`
 }
+
+func (cm *ClusterMetrics) updateClusterMetrics(clusterMetrics ClusterMetrics) {
+
+	cm.CpuUsage = clusterMetrics.CpuUsage
+	cm.RamUsage = clusterMetrics.RamUsage
+	cm.MemoryUsage = clusterMetrics.MemoryUsage
+
+}

@@ -20,8 +20,6 @@ type Edge struct {
 	EdgeMetrics NetworkMetrics `json:"edgeMetrics"`
 }
 
-//field names to be defined
-
 func (g *Graph) getVertex(k int) *Vertex {
 	//getVertexHandler return a pointer to the Vertex with a key int
 
@@ -35,11 +33,11 @@ func (g *Graph) getVertex(k int) *Vertex {
 
 func (g *Graph) addVertex(vertex Vertex) {
 	if containsVertex(g.Vertices, vertex.Id) {
-		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id", vertex.Id)
+		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id\n", vertex.Id)
 		fmt.Println(err.Error())
 	} else {
 		g.Vertices = append(g.Vertices, &vertex)
-		fmt.Printf("added new vertex  %v", vertex)
+		fmt.Printf("Added new vertex  %v\n", vertex)
 	}
 }
 
@@ -50,13 +48,13 @@ func (g *Graph) addEdge(edge Edge) {
 	toVertex := g.getVertex(edge.Target)
 	//check error
 	if fromVertex == nil || toVertex == nil {
-		err := fmt.Errorf("Invalid edge (%v<-->%v)", edge.Source, edge.Target)
+		err := fmt.Errorf("Invalid edge- at least one of Vertex not exists (%v<-->%v)\n", edge.Source, edge.Target)
 		fmt.Println(err.Error())
 	} else if fromVertex.Type == toVertex.Type {
 		err := fmt.Errorf("You cannot connect two Vertexes at the same type:  %v !\n", fromVertex.Type)
 		fmt.Println(err.Error())
 	} else if containsInt(fromVertex.Neighbours, edge.Target) || containsInt(toVertex.Neighbours, edge.Source) {
-		err := fmt.Errorf("Edge between (%v--%v) already exist", edge.Source, edge.Target)
+		err := fmt.Errorf("Edge between (%v--%v) already exist\n", edge.Source, edge.Target)
 		fmt.Println(err.Error())
 	} else {
 		//add edge at vertexes instances
@@ -109,3 +107,14 @@ func containsInt(s []int, k int) bool {
 	return false
 
 }
+
+
+/*func getEdge (sourceId, TargetId int) *Edge {
+
+/*	for i,v := range graph.Edges{
+		if v.Source == sourceId & v.Target == TargetId
+			return gra
+		}
+	}
+*/
+}*/

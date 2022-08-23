@@ -23,11 +23,12 @@ func defineRouterHanlders() {
 
 	r.HandleFunc("/graph/vertex", getAllVertexesHandler).Methods("GET")
 	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
+	r.HandleFunc("/graph/vertex/{Id}/metrics", updateClusterMetrics).Methods("PUT")
 	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
 
 	r.HandleFunc("/graph/edge", getEdgesHandler).Methods("GET")
-	//r.HandleFunc("/graph/edge/{Id}", getEdgeHandler).Methods("GET")
 	r.HandleFunc("/graph/edge", createEdgeHandler).Methods("POST")
+	r.HandleFunc("/graph/edge/{IdSource}/{IdTarget}/metrics", updateEdgeMetrics).Methods("POST")
 
 }
 
@@ -40,6 +41,50 @@ func createEdgeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Client tries to add new Edge: %v --- %v \n", edge.Source, edge.Target)
 	graph.addEdge(edge)
 
+}
+
+func updateClusterMetrics(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["Id"])
+	var clusterMetrics ClusterMetrics
+	_ = json.NewDecoder(r.Body).Decode(&clusterMetrics)
+
+	if containsVertex(graph.Vertices, id) {
+		graph.getVertex(id).VertexMetrics.updateClusterMetrics(clusterMetrics)
+		w.WriteHeader(http.StatusOK)
+		fmt.Printf("Client updates cluster metrics for vertex ID: %v\n", params["Id"])
+	} else {
+		err := fmt.Errorf("Vertex %v not updated beacuse it's not exist", id)
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusConflict)
+	}
+}
+
+func updateEdgeMetrics(w http.ResponseWriter, r *http.Request) {
+
+	/*	w.Header().Set("Content-Type", "application/json")
+
+		params := mux.Vars(r)
+		idSource, _ := strconv.Atoi(params["IdSource"])
+		idTarget, _ := strconv.Atoi(params["IdTarget"])
+		var edgeMetrics NetworkMetrics
+		_ = json.NewDecoder(r.Body).Decode(&edgeMetrics)
+	*/
+
+	//sprawdz czy istnieje dany link i go pobierz
+	//update danych na łaczu
+	/*if exist(graph.Vertices, id) {
+		graph.getVertex(id).VertexMetrics.updateClusterMetrics(clusterMetrics)
+		w.WriteHeader(http.StatusOK)
+		fmt.Printf("Client updates cluster metrics for vertex ID: %v\n", params["Id"])
+	} else {
+		err := fmt.Errorf("Vertex %v not updated beacuse it's not exist", id)
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusConflict)
+	}*/
 }
 
 func getVertexHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +111,7 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusConflict)
 	} else {
-		if containsEdge(vertex) {
+		if containsAnyEdge(vertex) {
 			vertex.Neighbours = nil
 		}
 		graph.addVertex(vertex)
@@ -74,7 +119,7 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func containsEdge(vertex Vertex) bool {
+func containsAnyEdge(vertex Vertex) bool {
 
 	if vertex.Neighbours != nil {
 		return true
