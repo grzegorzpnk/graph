@@ -33,6 +33,24 @@ func (g *Graph) GetVertex(k int) *Vertex {
 	return nil
 }
 
+func (g *Graph) InitializeGraph() {
+
+	for i := 0; i < 6; i++ {
+		if i%2 == 0 {
+			g.AddVertex(Vertex{Id: i, Type: "MEC", VertexMetrics: ClusterMetrics{20, 50, 80}})
+		} else {
+			g.AddVertex(Vertex{Id: i, Type: "CELL"})
+		}
+	}
+
+	g.AddEdge(Edge{1, 4, NetworkMetrics{1.3, 10}})
+	g.AddEdge(Edge{2, 5, NetworkMetrics{1.3, 10}})
+	g.AddEdge(Edge{3, 2, NetworkMetrics{1.3, 10}})
+	g.AddEdge(Edge{1, 0, NetworkMetrics{1.3, 10}})
+	g.AddEdge(Edge{4, 5, NetworkMetrics{1.3, 10}})
+	g.PrintGraph()
+}
+
 func (g *Graph) AddVertex(vertex Vertex) {
 	if ContainsVertex(g.Vertices, vertex.Id) {
 		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id\n", vertex.Id)

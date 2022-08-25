@@ -10,10 +10,10 @@ import (
 )
 
 type apiHandler struct {
-	graphClient topology.Graph
+	graphClient *topology.Graph
 }
 
-func (h *apiHandler) SetClients(graphClient topology.Graph) {
+func (h *apiHandler) SetClients(graphClient *topology.Graph) {
 	h.graphClient = graphClient
 }
 

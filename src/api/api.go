@@ -10,7 +10,7 @@ var r *mux.Router
 func NewRouter(graphClient *topology.Graph) *mux.Router {
 
 	var handler apiHandler
-	handler.SetClients(*graphClient)
+	handler.SetClients(graphClient)
 
 	r = mux.NewRouter()
 
