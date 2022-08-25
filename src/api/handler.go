@@ -1,59 +1,44 @@
-package main
+package api
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
+	"graph/src/pkg/topology"
 	"net/http"
 	"strconv"
 )
 
-var r *mux.Router
-
-func startServer() {
-
-	r = mux.NewRouter()
-	defineRouterHanlders()
-	log.Fatal(http.ListenAndServe("localhost:8080", r))
-
+type apiHandler struct {
+	graphClient topology.Graph
 }
 
-func defineRouterHanlders() {
-
-	r.HandleFunc("/graph/vertex", getAllVertexesHandler).Methods("GET")
-	r.HandleFunc("/graph/vertex/{Id}", getVertexHandler).Methods("GET")
-	r.HandleFunc("/graph/vertex/{Id}/metrics", updateClusterMetrics).Methods("PUT")
-	r.HandleFunc("/graph/vertex", createVertex).Methods("POST")
-
-	r.HandleFunc("/graph/edge", getEdgesHandler).Methods("GET")
-	r.HandleFunc("/graph/edge", createEdgeHandler).Methods("POST")
-	r.HandleFunc("/graph/edge/{IdSource}/{IdTarget}/metrics", updateEdgeMetrics).Methods("POST")
-
+func (h *apiHandler) SetClients(graphClient topology.Graph) {
+	h.graphClient = graphClient
 }
 
-func createEdgeHandler(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) createEdgeHandler(w http.ResponseWriter, r *http.Request) {
 	//todo: validate body of REST POST
 	w.Header().Set("Content-Type", "application/json")
 
-	var edge Edge
+	var edge topology.Edge
 	_ = json.NewDecoder(r.Body).Decode(&edge)
 	fmt.Printf("Client tries to add new Edge: %v --- %v \n", edge.Source, edge.Target)
-	graph.addEdge(edge)
+	h.graphClient.AddEdge(edge)
 
 }
 
-func updateClusterMetrics(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) updateClusterMetrics(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["Id"])
-	var clusterMetrics ClusterMetrics
+	var clusterMetrics topology.ClusterMetrics
 	_ = json.NewDecoder(r.Body).Decode(&clusterMetrics)
 
-	if containsVertex(graph.Vertices, id) {
-		graph.getVertex(id).VertexMetrics.updateClusterMetrics(clusterMetrics)
+	if topology.ContainsVertex(h.graphClient.Vertices, id) {
+		h.graphClient.GetVertex(id).VertexMetrics.UpdateClusterMetrics(clusterMetrics)
 		w.WriteHeader(http.StatusOK)
 		fmt.Printf("Client updates cluster metrics for vertex ID: %v\n", params["Id"])
 	} else {
@@ -87,26 +72,26 @@ func updateEdgeMetrics(w http.ResponseWriter, r *http.Request) {
 	}*/
 }
 
-func getVertexHandler(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) getVertexHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 
-	for i, v := range graph.Vertices {
+	for i, v := range h.graphClient.Vertices {
 		if strconv.Itoa(v.Id) == params["Id"] {
-			json.NewEncoder(w).Encode(graph.Vertices[i])
+			json.NewEncoder(w).Encode(h.graphClient.Vertices[i])
 		}
 	}
 
 }
 
-func createVertex(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) createVertex(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	var vertex Vertex
+	var vertex topology.Vertex
 	_ = json.NewDecoder(r.Body).Decode(&vertex)
 	fmt.Printf("Client tries to add new vertex ID: %v\n", vertex.Id)
-	if containsVertex(graph.Vertices, vertex.Id) {
+	if topology.ContainsVertex(h.graphClient.Vertices, vertex.Id) {
 		err := fmt.Errorf("Vertex %v not added beacuse it is an existing key", vertex.Id)
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusConflict)
@@ -114,12 +99,12 @@ func createVertex(w http.ResponseWriter, r *http.Request) {
 		if containsAnyEdge(vertex) {
 			vertex.Neighbours = nil
 		}
-		graph.addVertex(vertex)
+		h.graphClient.AddVertex(vertex)
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func containsAnyEdge(vertex Vertex) bool {
+func containsAnyEdge(vertex topology.Vertex) bool {
 
 	if vertex.Neighbours != nil {
 		return true
@@ -129,17 +114,18 @@ func containsAnyEdge(vertex Vertex) bool {
 
 }
 
-func getEdgesHandler(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) getEdgesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	for i, _ := range graph.Edges {
-		json.NewEncoder(w).Encode(graph.Edges[i])
+	for i, _ := range h.graphClient.Edges {
+		json.NewEncoder(w).Encode(h.graphClient.Edges[i])
 	}
 
 }
 
-func getAllVertexesHandler(w http.ResponseWriter, r *http.Request) {
+func (h *apiHandler) getAllVertexesHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(graph.Vertices)
+	json.NewEncoder(w).Encode(h.graphClient.Vertices)
+
 }

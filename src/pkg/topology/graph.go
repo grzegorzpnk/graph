@@ -1,6 +1,8 @@
-package main
+package topology
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Graph struct {
 	Vertices []*Vertex
@@ -20,7 +22,7 @@ type Edge struct {
 	EdgeMetrics NetworkMetrics `json:"edgeMetrics"`
 }
 
-func (g *Graph) getVertex(k int) *Vertex {
+func (g *Graph) GetVertex(k int) *Vertex {
 	//getVertexHandler return a pointer to the Vertex with a key int
 
 	for i, v := range g.Vertices {
@@ -31,8 +33,8 @@ func (g *Graph) getVertex(k int) *Vertex {
 	return nil
 }
 
-func (g *Graph) addVertex(vertex Vertex) {
-	if containsVertex(g.Vertices, vertex.Id) {
+func (g *Graph) AddVertex(vertex Vertex) {
+	if ContainsVertex(g.Vertices, vertex.Id) {
 		err := fmt.Errorf("Vertex %v not added beacuse already exist vertex with the same id\n", vertex.Id)
 		fmt.Println(err.Error())
 	} else {
@@ -41,11 +43,11 @@ func (g *Graph) addVertex(vertex Vertex) {
 	}
 }
 
-func (g *Graph) addEdge(edge Edge) {
+func (g *Graph) AddEdge(edge Edge) {
 
 	//get vertex
-	fromVertex := g.getVertex(edge.Source)
-	toVertex := g.getVertex(edge.Target)
+	fromVertex := g.GetVertex(edge.Source)
+	toVertex := g.GetVertex(edge.Target)
 	//check error
 	if fromVertex == nil || toVertex == nil {
 		err := fmt.Errorf("Invalid edge- at least one of Vertex not exists (%v<-->%v)\n", edge.Source, edge.Target)
@@ -67,7 +69,7 @@ func (g *Graph) addEdge(edge Edge) {
 	}
 }
 
-func (g *Graph) printGraph() {
+func (g *Graph) PrintGraph() {
 
 	//print vertexes
 	for _, v := range g.Vertices {
@@ -86,7 +88,7 @@ func (g *Graph) printGraph() {
 
 }
 
-func containsVertex(s []*Vertex, k int) bool {
+func ContainsVertex(s []*Vertex, k int) bool {
 
 	for _, v := range s {
 		if k == v.Id {

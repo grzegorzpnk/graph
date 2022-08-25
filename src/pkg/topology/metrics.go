@@ -1,4 +1,4 @@
-package main
+package topology
 
 type ClusterMetrics struct {
 	CpuUsage    int `json:"cpuUsage"`
@@ -13,7 +13,7 @@ type NetworkMetrics struct {
 	PacketDrop int     `json:"packetDrop"`
 }
 
-func (cm *ClusterMetrics) updateClusterMetrics(clusterMetrics ClusterMetrics) {
+func (cm *ClusterMetrics) UpdateClusterMetrics(clusterMetrics ClusterMetrics) {
 
 	cm.CpuUsage = clusterMetrics.CpuUsage
 	cm.RamUsage = clusterMetrics.RamUsage
